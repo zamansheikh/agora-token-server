@@ -19,8 +19,11 @@ A Node.js server that generates Agora RTC and RTM tokens for Flutter application
    ```
 
 2. **Configure environment variables:**
-   - Copy `.env` file and update with your Agora credentials
+   - Copy `.env.example` to `.env` and update with your Agora credentials
    - Get your App ID and App Certificate from [Agora Console](https://console.agora.io/)
+   ```bash
+   cp .env.example .env
+   ```
 
 3. **Update `.env` file:**
    ```
