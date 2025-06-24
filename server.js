@@ -100,11 +100,40 @@ app.use('*', (req, res) => {
     });
 });
 
+// Function to get server's actual IP address
+const getServerIP = () => {
+    const { networkInterfaces } = require('os');
+    const nets = networkInterfaces();
+    const results = {};
+
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+            if (net.family === 'IPv4' && !net.internal) {
+                if (!results[name]) {
+                    results[name] = [];
+                }
+                results[name].push(net.address);
+            }
+        }
+    }
+
+    // Return the first external IPv4 address found
+    const interfaces = Object.values(results);
+    return interfaces.length > 0 ? interfaces[0][0] : 'localhost';
+};
+
 // Start server
 app.listen(PORT, () => {
+    const serverIP = getServerIP();
+
     console.log(`🚀 Agora Token Server is running on port ${PORT}`);
     console.log(`📱 Ready to serve Flutter app tokens!`);
-    console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🌐 Server URLs:`);
+    console.log(`   Local:    http://localhost:${PORT}`);
+    console.log(`   Network:  http://${serverIP}:${PORT}`);
+    console.log(`   Health:   http://${serverIP}:${PORT}/api/health`);
+    console.log(`   API Base: http://${serverIP}:${PORT}/api`);
 
     // Validate environment variables
     if (!process.env.AGORA_APP_ID || !process.env.AGORA_APP_CERTIFICATE) {
