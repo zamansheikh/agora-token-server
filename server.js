@@ -30,12 +30,18 @@ const corsOptions = {
         if (!origin) return callback(null, true);
 
         const allowedOrigins = process.env.ALLOWED_ORIGINS
-            ? process.env.ALLOWED_ORIGINS.split(',')
+            ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
             : ['http://localhost:3000', 'http://127.0.0.1:3000'];
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        // Check if wildcard (*) is used to allow all origins
+        if (allowedOrigins.includes('*')) {
+            console.log(`🌐 CORS: Allowing all origins (wildcard enabled)`);
+            callback(null, true);
+        } else if (allowedOrigins.indexOf(origin) !== -1) {
+            console.log(`✅ CORS: Allowed origin - ${origin}`);
             callback(null, true);
         } else {
+            console.log(`❌ CORS: Blocked origin - ${origin}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
