@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agora Token Server - Admin Panel</title>
+    <title>Agora Token Server | Admin Console</title>
     <link rel="stylesheet" href="css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -12,21 +13,18 @@
     <div id="loginScreen" class="login-container">
         <div class="login-box">
             <div class="login-header">
-                <i class="fas fa-shield-alt"></i>
-                <h1>Admin Panel</h1>
-                <p>Agora Token Server</p>
+                <i class="fas fa-shield-halved"></i>
+                <h1>Admin Console</h1>
+                <p>Secure Access Gateway</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i> Password
-                    </label>
                     <input type="password" id="password" placeholder="Enter admin password" required>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Login
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Access Dashboard <i class="fas fa-arrow-right"></i>
                 </button>
-                <div id="loginError" class="error-message"></div>
+                <div id="loginError" class="error-message" style="color: var(--danger-color); margin-top: 1rem; font-size: 0.9rem;"></div>
             </form>
         </div>
     </div>
@@ -36,10 +34,13 @@
         <!-- Header -->
         <header class="dashboard-header">
             <div class="header-content">
-                <h1><i class="fas fa-tachometer-alt"></i> Agora Token Server Dashboard</h1>
-                <button id="logoutBtn" class="btn btn-secondary">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+                <h1><i class="fas fa-bolt"></i> Token Server Admin</h1>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span id="liveIndicator" class="value online" style="font-size: 0.8rem;"><i class="fas fa-circle"></i> Live Updates</span>
+                    <button id="logoutBtn" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -49,13 +50,13 @@
                 <i class="fas fa-chart-line"></i> Overview
             </button>
             <button class="nav-item" data-section="config">
-                <i class="fas fa-cog"></i> Configuration
+                <i class="fas fa-sliders"></i> Configuration
             </button>
             <button class="nav-item" data-section="statistics">
-                <i class="fas fa-chart-bar"></i> Statistics
+                <i class="fas fa-chart-pie"></i> Analytics
             </button>
             <button class="nav-item" data-section="test">
-                <i class="fas fa-flask"></i> Test Tokens
+                <i class="fas fa-vial"></i> Token Tester
             </button>
         </nav>
 
@@ -63,12 +64,12 @@
         <main class="dashboard-main">
             <!-- Overview Section -->
             <section id="overviewSection" class="content-section active">
-                <h2>Overview</h2>
+                <h2>System Overview</h2>
                 
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-server"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="totalRequests">0</h3>
@@ -77,12 +78,12 @@
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #FF6B6B 0%, #EE5D87 100%);">
                             <i class="fas fa-video"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="rtcRequests">0</h3>
-                            <p>RTC Tokens</p>
+                            <p>RTC Video Tokens</p>
                         </div>
                     </div>
 
@@ -92,42 +93,42 @@
                         </div>
                         <div class="stat-info">
                             <h3 id="rtmRequests">0</h3>
-                            <p>RTM Tokens</p>
+                            <p>RTM Msg Tokens</p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                            <i class="fas fa-user-shield"></i>
+                            <i class="fas fa-cog"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="adminRequests">0</h3>
-                            <p>Admin Requests</p>
+                            <p>Admin Actions</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="info-grid">
                     <div class="info-card">
-                        <h3><i class="fas fa-info-circle"></i> Server Status</h3>
+                        <h3><i class="fas fa-network-wired"></i> System Status</h3>
                         <div class="status-info">
                             <div class="status-item">
-                                <span class="label">Status:</span>
-                                <span class="value online"><i class="fas fa-circle"></i> Online</span>
+                                <span class="label">Server Status</span>
+                                <span class="value online"><i class="fas fa-circle"></i> Operational</span>
                             </div>
                             <div class="status-item">
-                                <span class="label">App ID:</span>
-                                <span class="value" id="overviewAppId">Not configured</span>
+                                <span class="label">Active App ID</span>
+                                <span class="value" id="overviewAppId" style="font-family: monospace; letter-spacing: 1px;">-</span>
                             </div>
                             <div class="status-item">
-                                <span class="label">Last Reset:</span>
+                                <span class="label">Uptime Since</span>
                                 <span class="value" id="lastReset">-</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="info-card">
-                        <h3><i class="fas fa-link"></i> API Endpoints</h3>
+                        <h3><i class="fas fa-link"></i> Quick API Reference</h3>
                         <div class="endpoint-list">
                             <div class="endpoint-item">
                                 <span class="method get">GET</span>
@@ -141,10 +142,6 @@
                                 <span class="method post">POST</span>
                                 <code>/api/token/rtc</code>
                             </div>
-                            <div class="endpoint-item">
-                                <span class="method post">POST</span>
-                                <code>/api/token/rtm</code>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -152,142 +149,139 @@
 
             <!-- Configuration Section -->
             <section id="configSection" class="content-section">
-                <h2>Configuration</h2>
+                <h2>Server Configuration</h2>
                 
                 <div class="config-container">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        Changes are saved immediately and will affect all new token requests.
+                    <div class="info-card" style="margin-bottom: 2rem;">
+                        <form id="configForm">
+                            <h3 style="margin-bottom: 1.5rem; color: var(--secondary-color);">Agora Credentials</h3>
+                            <div class="form-group">
+                                <label for="agoraAppId">
+                                    <i class="fas fa-id-card"></i> App ID
+                                </label>
+                                <input type="text" id="agoraAppId" placeholder="Enter Agora App ID" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="agoraAppCertificate">
+                                    <i class="fas fa-key"></i> App Certificate
+                                </label>
+                                <input type="password" id="agoraAppCertificate" placeholder="Enter Agora App Certificate" required>
+                            </div>
+
+                            <h3 style="margin: 2rem 0 1.5rem; color: var(--secondary-color);">Default Parameters</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="defaultChannelName">
+                                        <i class="fas fa-hashtag"></i> Default Channel
+                                    </label>
+                                    <input type="text" id="defaultChannelName" placeholder="test-channel">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="defaultUid">
+                                        <i class="fas fa-user-circle"></i> Default UID
+                                    </label>
+                                    <input type="text" id="defaultUid" placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="form-row" style="margin-bottom: 2rem;">
+                                <div class="form-group">
+                                    <label for="defaultRole">
+                                        <i class="fas fa-user-tag"></i> Default Role
+                                    </label>
+                                    <select id="defaultRole">
+                                        <option value="publisher">Publisher</option>
+                                        <option value="subscriber">Subscriber</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="defaultExpireTime">
+                                        <i class="fas fa-stopwatch"></i> Token Expiry (sec)
+                                    </label>
+                                    <input type="number" id="defaultExpireTime" placeholder="3600" min="60">
+                                </div>
+                            </div>
+
+                            <div class="form-actions" style="display: flex; gap: 1rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                                <button type="button" id="loadConfigBtn" class="btn btn-secondary">
+                                    <i class="fas fa-rotate"></i> Reset to Saved
+                                </button>
+                            </div>
+                            <div id="configMessage" style="margin-top: 1rem; font-weight: 600;"></div>
+                        </form>
                     </div>
-
-                    <form id="configForm" class="config-form">
-                        <div class="form-group">
-                            <label for="agoraAppId">
-                                <i class="fas fa-id-card"></i> Agora App ID
-                            </label>
-                            <input type="text" id="agoraAppId" placeholder="Enter your Agora App ID" required>
-                            <small>Your Agora application identifier</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="agoraAppCertificate">
-                                <i class="fas fa-certificate"></i> Agora App Certificate
-                            </label>
-                            <input type="password" id="agoraAppCertificate" placeholder="Enter your Agora App Certificate" required>
-                            <small>Your Agora application certificate (keep secret)</small>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="defaultChannelName">
-                                    <i class="fas fa-broadcast-tower"></i> Default Channel Name
-                                </label>
-                                <input type="text" id="defaultChannelName" placeholder="test-channel">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="defaultUid">
-                                    <i class="fas fa-user"></i> Default UID
-                                </label>
-                                <input type="text" id="defaultUid" placeholder="0">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="defaultRole">
-                                    <i class="fas fa-user-tag"></i> Default Role
-                                </label>
-                                <select id="defaultRole">
-                                    <option value="publisher">Publisher</option>
-                                    <option value="subscriber">Subscriber</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="defaultExpireTime">
-                                    <i class="fas fa-clock"></i> Default Expire Time (seconds)
-                                </label>
-                                <input type="number" id="defaultExpireTime" placeholder="3600" min="60">
-                            </div>
-                        </div>
-
+                    
+                    <div class="info-card">
+                        <h3 style="color: var(--danger-color);"><i class="fas fa-lock"></i> Security</h3>
                         <div class="form-group">
                             <label for="newAdminPassword">
-                                <i class="fas fa-key"></i> New Admin Password (optional)
+                                Update Admin Password
                             </label>
-                            <input type="password" id="newAdminPassword" placeholder="Leave empty to keep current password">
-                            <small>Change the admin panel password</small>
+                            <input type="password" id="newAdminPassword" placeholder="New password (leave empty to keep current)">
                         </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Configuration
-                            </button>
-                            <button type="button" id="loadConfigBtn" class="btn btn-secondary">
-                                <i class="fas fa-sync"></i> Reload
-                            </button>
-                        </div>
-
-                        <div id="configMessage" class="message-box"></div>
-                    </form>
+                    </div>
                 </div>
             </section>
 
             <!-- Statistics Section -->
             <section id="statisticsSection" class="content-section">
-                <h2>Detailed Statistics</h2>
-
-                <div class="stats-actions">
-                    <button id="refreshStatsBtn" class="btn btn-secondary">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                    <button id="resetStatsBtn" class="btn btn-danger">
-                        <i class="fas fa-trash-alt"></i> Reset Statistics
-                    </button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2>Analytics & History</h2>
+                    <div class="stats-actions" style="display: flex; gap: 1rem;">
+                        <button id="refreshStatsBtn" class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button id="resetStatsBtn" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Clear Data
+                        </button>
+                    </div>
                 </div>
 
-                <div class="stats-detail">
-                    <div class="stat-detail-card">
-                        <h3><i class="fas fa-history"></i> Request History</h3>
-                        <div id="requestHistory" class="history-list">
-                            <p class="no-data">No requests recorded yet</p>
-                        </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-history"></i> Recent Requests</h3>
+                    <div id="requestHistory" class="history-list" style="max-height: 500px; overflow-y: auto;">
+                        <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading...</div>
                     </div>
                 </div>
             </section>
 
             <!-- Test Tokens Section -->
             <section id="testSection" class="content-section">
-                <h2>Test Token Generation</h2>
-
-                <div class="test-container">
-                    <div class="test-card">
-                        <h3><i class="fas fa-video"></i> Test RTC Token</h3>
+                <h2>Token Generator Validator</h2>
+                
+                <div class="form-row">
+                    <div class="info-card">
+                        <h3><i class="fas fa-video"></i> RTC Token</h3>
                         <form id="testRtcForm">
                             <div class="form-group">
-                                <label>Channel Name (optional)</label>
-                                <input type="text" id="testRtcChannel" placeholder="Uses default from config">
+                                <label>Channel Name</label>
+                                <input type="text" id="testRtcChannel" placeholder="Leave empty for default">
                             </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-play"></i> Generate RTC Token
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Generate RTC Token
                             </button>
                         </form>
-                        <div id="rtcTestResult" class="test-result"></div>
+                        <div id="rtcTestResult" style="margin-top: 1rem; word-break: break-all; font-family: 'Fira Code', monospace; line-height: 1.5; font-size: 0.85rem; color: var(--success-color);"></div>
                     </div>
 
-                    <div class="test-card">
-                        <h3><i class="fas fa-comments"></i> Test RTM Token</h3>
+                    <div class="info-card">
+                        <h3><i class="fas fa-comments"></i> RTM Token</h3>
                         <form id="testRtmForm">
                             <div class="form-group">
-                                <label>UID (optional)</label>
-                                <input type="text" id="testRtmUid" placeholder="Uses default from config">
+                                <label>User ID</label>
+                                <input type="text" id="testRtmUid" placeholder="Leave empty for default">
                             </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-play"></i> Generate RTM Token
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Generate RTM Token
                             </button>
                         </form>
-                        <div id="rtmTestResult" class="test-result"></div>
+                        <div id="rtmTestResult" style="margin-top: 1rem; word-break: break-all; font-family: 'Fira Code', monospace; line-height: 1.5; font-size: 0.85rem; color: var(--success-color);"></div>
                     </div>
                 </div>
             </section>

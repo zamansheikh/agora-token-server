@@ -8,9 +8,11 @@ const adminDashboard = document.getElementById('adminDashboard');
 const loginForm = document.getElementById('loginForm');
 const loginError = document.getElementById('loginError');
 const logoutBtn = document.getElementById('logoutBtn');
+const liveIndicator = document.getElementById('liveIndicator');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if previously logged in (optional - for this demo we'll require login every reload for security)
     setupEventListeners();
 });
 
@@ -30,7 +32,10 @@ function setupEventListeners() {
     document.getElementById('loadConfigBtn').addEventListener('click', loadConfig);
 
     // Statistics
-    document.getElementById('refreshStatsBtn').addEventListener('click', loadStatistics);
+    document.getElementById('refreshStatsBtn').addEventListener('click', () => {
+        loadStatistics();
+        flashIndicator();
+    });
     document.getElementById('resetStatsBtn').addEventListener('click', handleResetStats);
 
     // Test
@@ -38,18 +43,24 @@ function setupEventListeners() {
     document.getElementById('testRtmForm').addEventListener('submit', handleTestRtm);
 }
 
+// Visual Effects
+function flashIndicator() {
+    if (liveIndicator) {
+        liveIndicator.style.opacity = '0.5';
+        setTimeout(() => liveIndicator.style.opacity = '1', 200);
+    }
+}
+
 // Login Handler
 async function handleLogin(e) {
     e.preventDefault();
-    
+
     const password = document.getElementById('password').value;
-    
+
     try {
         const response = await fetch('/api/admin/verify', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password })
         });
 
@@ -60,10 +71,12 @@ async function handleLogin(e) {
             showDashboard();
             loadDashboardData();
         } else {
-            showError(loginError, data.error || 'Invalid password');
+            loginError.textContent = data.error || 'Invalid password';
+            loginError.style.display = 'block';
         }
     } catch (error) {
-        showError(loginError, 'Failed to connect to server');
+        loginError.textContent = 'Failed to connect to server';
+        loginError.style.display = 'block';
     }
 }
 
@@ -74,24 +87,24 @@ function handleLogout() {
     loginScreen.style.display = 'flex';
     adminDashboard.style.display = 'none';
     document.getElementById('password').value = '';
+    loginError.style.display = 'none';
 }
 
 // Show Dashboard
 function showDashboard() {
     loginScreen.style.display = 'none';
-    adminDashboard.style.display = 'block';
-    
-    // Auto-refresh stats every 30 seconds
-    statsInterval = setInterval(loadStatistics, 30000);
+    adminDashboard.style.display = 'block'; // Grid layout handled by CSS if needed, but container is block
+
+    // Auto-refresh stats every 5 seconds for "Live" feel
+    statsInterval = setInterval(loadStatistics, 5000);
 }
 
 // Switch Section
 function switchSection(section) {
     // Update navigation
     document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
+        item.classList.toggle('active', item.dataset.section === section);
     });
-    event.target.closest('.nav-item').classList.add('active');
 
     // Update content
     document.querySelectorAll('.content-section').forEach(sec => {
@@ -100,11 +113,7 @@ function switchSection(section) {
     document.getElementById(section + 'Section').classList.add('active');
 
     // Load section data
-    if (section === 'config') {
-        loadConfig();
-    } else if (section === 'statistics') {
-        loadStatistics();
-    }
+    if (section === 'config') loadConfig();
 }
 
 // Load Dashboard Data
@@ -117,9 +126,7 @@ async function loadDashboardData() {
 async function loadStatistics() {
     try {
         const response = await fetch('/api/admin/stats', {
-            headers: {
-                'x-admin-password': adminPassword
-            }
+            headers: { 'x-admin-password': adminPassword }
         });
 
         const data = await response.json();
@@ -135,25 +142,34 @@ async function loadStatistics() {
 // Update Stats Display
 function updateStatsDisplay(stats) {
     // Overview stats
-    document.getElementById('totalRequests').textContent = stats.totalRequests || 0;
-    document.getElementById('rtcRequests').textContent = stats.rtcRequests || 0;
-    document.getElementById('rtmRequests').textContent = stats.rtmRequests || 0;
-    document.getElementById('adminRequests').textContent = stats.adminRequests || 0;
-    
+    const animateValue = (id, valid) => {
+        const el = document.getElementById(id);
+        if (el.textContent != valid) {
+            el.textContent = valid;
+            el.parentElement.style.transform = "scale(1.05)";
+            setTimeout(() => el.parentElement.style.transform = "scale(1)", 200);
+        }
+    };
+
+    animateValue('totalRequests', stats.totalRequests || 0);
+    animateValue('rtcRequests', stats.rtcRequests || 0);
+    animateValue('rtmRequests', stats.rtmRequests || 0);
+    animateValue('adminRequests', stats.adminRequests || 0);
+
     const lastReset = stats.lastReset ? new Date(stats.lastReset).toLocaleString() : 'Never';
     document.getElementById('lastReset').textContent = lastReset;
 
     // Request history
     const historyContainer = document.getElementById('requestHistory');
     if (stats.requestHistory && stats.requestHistory.length > 0) {
-        historyContainer.innerHTML = stats.requestHistory.slice(0, 20).map(req => `
+        historyContainer.innerHTML = stats.requestHistory.slice(0, 50).map(req => `
             <div class="history-item">
                 <span class="type ${req.type}">${req.type.toUpperCase()}</span>
-                <span class="timestamp">${new Date(req.timestamp).toLocaleString()}</span>
+                <span class="timestamp">${new Date(req.timestamp).toLocaleTimeString()}</span>
             </div>
         `).join('');
     } else {
-        historyContainer.innerHTML = '<p class="no-data">No requests recorded yet</p>';
+        historyContainer.innerHTML = '<p class="no-data" style="text-align:center; padding:1rem; color:var(--text-secondary);">No requests recorded yet</p>';
     }
 }
 
@@ -161,16 +177,14 @@ function updateStatsDisplay(stats) {
 async function loadConfig() {
     try {
         const response = await fetch('/api/admin/config', {
-            headers: {
-                'x-admin-password': adminPassword
-            }
+            headers: { 'x-admin-password': adminPassword }
         });
 
         const data = await response.json();
 
         if (data.success) {
             const config = data.config;
-            
+
             // Update form
             document.getElementById('agoraAppId').value = config.agoraAppId || '';
             document.getElementById('agoraAppCertificate').value = config.agoraAppCertificate || '';
@@ -178,11 +192,11 @@ async function loadConfig() {
             document.getElementById('defaultUid').value = config.defaultUid || '';
             document.getElementById('defaultRole').value = config.defaultRole || 'publisher';
             document.getElementById('defaultExpireTime').value = config.defaultExpireTime || 3600;
-            
+
             // Update overview
-            const appIdDisplay = config.agoraAppId ? 
-                config.agoraAppId.substring(0, 8) + '...' : 
-                'Not configured';
+            const appIdDisplay = config.agoraAppId ?
+                config.agoraAppId.substring(0, 8) + '...' :
+                'Not Configured';
             document.getElementById('overviewAppId').textContent = appIdDisplay;
         }
     } catch (error) {
@@ -193,7 +207,7 @@ async function loadConfig() {
 // Handle Config Update
 async function handleConfigUpdate(e) {
     e.preventDefault();
-    
+
     const configData = {
         agoraAppId: document.getElementById('agoraAppId').value,
         agoraAppCertificate: document.getElementById('agoraAppCertificate').value,
@@ -209,6 +223,10 @@ async function handleConfigUpdate(e) {
         configData.adminPassword = newPassword;
     }
 
+    const messageBox = document.getElementById('configMessage');
+    messageBox.textContent = 'Saving...';
+    messageBox.className = '';
+
     try {
         const response = await fetch('/api/admin/config', {
             method: 'POST',
@@ -220,49 +238,34 @@ async function handleConfigUpdate(e) {
         });
 
         const data = await response.json();
-        const messageBox = document.getElementById('configMessage');
 
         if (data.success) {
-            showMessage(messageBox, 'Configuration updated successfully!', 'success');
-            
-            // Update password if changed
+            showMessage(messageBox, 'Configuration saved successfully!', 'success');
+
             if (newPassword) {
                 adminPassword = newPassword;
                 document.getElementById('newAdminPassword').value = '';
             }
-            
-            // Reload overview data
             loadConfig();
         } else {
             showMessage(messageBox, data.error || 'Failed to update configuration', 'error');
         }
     } catch (error) {
-        showMessage(document.getElementById('configMessage'), 'Failed to connect to server', 'error');
+        showMessage(messageBox, 'Failed to connect to server', 'error');
     }
 }
 
 // Handle Reset Stats
 async function handleResetStats() {
-    if (!confirm('Are you sure you want to reset all statistics? This cannot be undone.')) {
-        return;
-    }
+    if (!confirm('Are you sure you want to reset all statistics?')) return;
 
     try {
         const response = await fetch('/api/admin/stats/reset', {
             method: 'POST',
-            headers: {
-                'x-admin-password': adminPassword
-            }
+            headers: { 'x-admin-password': adminPassword }
         });
 
-        const data = await response.json();
-
-        if (data.success) {
-            alert('Statistics reset successfully!');
-            loadStatistics();
-        } else {
-            alert(data.error || 'Failed to reset statistics');
-        }
+        loadStatistics();
     } catch (error) {
         alert('Failed to connect to server');
     }
@@ -271,98 +274,65 @@ async function handleResetStats() {
 // Handle Test RTC
 async function handleTestRtc(e) {
     e.preventDefault();
-    
     const channelName = document.getElementById('testRtcChannel').value;
-    const url = channelName ? 
-        `/api/token/rtc?channelName=${encodeURIComponent(channelName)}` : 
+    const url = channelName ?
+        `/api/token/rtc?channelName=${encodeURIComponent(channelName)}` :
         '/api/token/rtc';
 
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        const resultDiv = document.getElementById('rtcTestResult');
-        if (data.success) {
-            resultDiv.innerHTML = `
-                <h4 style="color: #28a745; margin-bottom: 10px;">✓ Success</h4>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-                <button class="copy-btn" onclick="copyToClipboard('${data.token}')">
-                    <i class="fas fa-copy"></i> Copy Token
-                </button>
-            `;
-        } else {
-            resultDiv.innerHTML = `
-                <h4 style="color: #dc3545; margin-bottom: 10px;">✗ Error</h4>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-            `;
-        }
-        resultDiv.classList.add('show');
-    } catch (error) {
-        document.getElementById('rtcTestResult').innerHTML = `
-            <h4 style="color: #dc3545;">✗ Error</h4>
-            <p>Failed to connect to server</p>
-        `;
-    }
+    runTokenTest(url, 'rtcTestResult');
 }
 
 // Handle Test RTM
 async function handleTestRtm(e) {
     e.preventDefault();
-    
     const uid = document.getElementById('testRtmUid').value;
-    const url = uid ? 
-        `/api/token/rtm?uid=${encodeURIComponent(uid)}` : 
+    const url = uid ?
+        `/api/token/rtm?uid=${encodeURIComponent(uid)}` :
         '/api/token/rtm';
+
+    runTokenTest(url, 'rtmTestResult');
+}
+
+async function runTokenTest(url, resultElementId) {
+    const resultDiv = document.getElementById(resultElementId);
+    resultDiv.innerHTML = '<span style="color:var(--text-secondary)">Generating...</span>';
 
     try {
         const response = await fetch(url);
         const data = await response.json();
-        
-        const resultDiv = document.getElementById('rtmTestResult');
+
         if (data.success) {
             resultDiv.innerHTML = `
-                <h4 style="color: #28a745; margin-bottom: 10px;">✓ Success</h4>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-                <button class="copy-btn" onclick="copyToClipboard('${data.token}')">
-                    <i class="fas fa-copy"></i> Copy Token
-                </button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span style="color:var(--success-color); font-weight:bold;">✓ Token Generated</span>
+                    <button class="copy-btn" onclick="copyToClipboard('${data.token}')">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-secondary); word-break:break-all;">
+                    ${data.token.substring(0, 50)}...
+                </div>
             `;
+            loadStatistics(); // Refresh stats to show the new request
         } else {
-            resultDiv.innerHTML = `
-                <h4 style="color: #dc3545; margin-bottom: 10px;">✗ Error</h4>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-            `;
+            resultDiv.innerHTML = `<span style="color:var(--danger-color)">Error: ${data.error || 'Unknown error'}</span>`;
         }
-        resultDiv.classList.add('show');
     } catch (error) {
-        document.getElementById('rtmTestResult').innerHTML = `
-            <h4 style="color: #dc3545;">✗ Error</h4>
-            <p>Failed to connect to server</p>
-        `;
+        resultDiv.innerHTML = `<span style="color:var(--danger-color)">Connection Error</span>`;
     }
 }
 
-// Utility Functions
-function showError(element, message) {
-    element.textContent = message;
-    element.classList.add('show');
-    setTimeout(() => {
-        element.classList.remove('show');
-    }, 5000);
-}
-
+// Utilities
 function showMessage(element, message, type) {
     element.textContent = message;
     element.className = 'message-box show ' + type;
     setTimeout(() => {
-        element.classList.remove('show');
-    }, 5000);
+        element.className = '';
+        element.textContent = '';
+    }, 3000);
 }
 
 function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Token copied to clipboard!');
-    }).catch(() => {
-        alert('Failed to copy token');
-    });
+    navigator.clipboard.writeText(text);
+    // Could add visual feedback here
 }

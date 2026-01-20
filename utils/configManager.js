@@ -16,7 +16,7 @@ class ConfigManager {
         try {
             const data = fs.readFileSync(CONFIG_PATH, 'utf8');
             this.config = JSON.parse(data);
-            
+
             // Override with environment variables if present
             if (process.env.AGORA_APP_ID) {
                 this.config.agoraAppId = process.env.AGORA_APP_ID;
@@ -61,6 +61,10 @@ class ConfigManager {
 
     saveConfig() {
         try {
+            const dir = path.dirname(CONFIG_PATH);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
             fs.writeFileSync(CONFIG_PATH, JSON.stringify(this.config, null, 2));
             return true;
         } catch (error) {
@@ -71,6 +75,10 @@ class ConfigManager {
 
     saveStats() {
         try {
+            const dir = path.dirname(STATS_PATH);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
             fs.writeFileSync(STATS_PATH, JSON.stringify(this.stats, null, 2));
             return true;
         } catch (error) {
@@ -106,8 +114,8 @@ class ConfigManager {
 
     incrementStat(type) {
         this.stats.totalRequests++;
-        
-        switch(type) {
+
+        switch (type) {
             case 'rtc':
                 this.stats.rtcRequests++;
                 break;
@@ -124,7 +132,7 @@ class ConfigManager {
             type,
             timestamp: new Date().toISOString()
         });
-        
+
         if (this.stats.requestHistory.length > 100) {
             this.stats.requestHistory = this.stats.requestHistory.slice(0, 100);
         }
