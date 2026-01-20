@@ -64,3 +64,10 @@ Thumbs.db
 # Build
 dist/
 build/
+
+# Configuration files with sensitive data
+config/config.json
+config/stats.json
+
+# PM2
+.pm2/

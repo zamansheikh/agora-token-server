@@ -1,0 +1,9 @@
+{
+  "agoraAppId": "your-app-id-here",
+  "agoraAppCertificate": "your-app-certificate-here",
+  "adminPassword": "admin123",
+  "defaultChannelName": "test-channel",
+  "defaultUid": "0",
+  "defaultRole": "publisher",
+  "defaultExpireTime": 3600
+}

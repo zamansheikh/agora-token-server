@@ -2,15 +2,19 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 const tokenRoutes = require('./routes/token');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable for admin panel assets
+}));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -55,8 +59,12 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve static files for admin panel
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Routes
 app.use('/api', tokenRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -72,11 +80,14 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({
         message: 'Agora Token Server is running!',
-        version: '1.0.0',
+        version: '2.0.0',
         endpoints: {
             health: '/api/health',
-            rtcToken: 'POST /api/token/rtc',
-            rtmToken: 'POST /api/token/rtm',
+            admin: '/admin.html',
+            rtcTokenPost: 'POST /api/token/rtc',
+            rtmTokenPost: 'POST /api/token/rtm',
+            rtcTokenGet: 'GET /api/token/rtc',
+            rtmTokenGet: 'GET /api/token/rtm',
         },
     });
 });
@@ -140,11 +151,17 @@ app.listen(PORT, () => {
     console.log(`   Network:  http://${serverIP}:${PORT}`);
     console.log(`   Health:   http://${serverIP}:${PORT}/api/health`);
     console.log(`   API Base: http://${serverIP}:${PORT}/api`);
+    console.log(`   Admin:    http://${serverIP}:${PORT}/admin.html`);
 
     // Validate environment variables
+    console.log('\n📋 Configuration:');
     if (!process.env.AGORA_APP_ID || !process.env.AGORA_APP_CERTIFICATE) {
-        console.warn('⚠️  Warning: AGORA_APP_ID and AGORA_APP_CERTIFICATE must be set in .env file');
+        console.log('   ⚠️  App ID/Certificate: Not set in .env - Configure via Admin Panel');
+    } else {
+        console.log('   ✅ App ID/Certificate: Loaded from .env file');
     }
+    console.log('   💡 Default admin password: admin123');
+    console.log('   🔐 Change password via Admin Panel for security');
 });
 
 module.exports = app;
