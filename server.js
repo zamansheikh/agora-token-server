@@ -25,7 +25,7 @@ const limiter = rateLimit({
     },
 });
 
-app.use(limiter);
+// app.use(limiter);
 
 // CORS configuration
 const corsOptions = {
