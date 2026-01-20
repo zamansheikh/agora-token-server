@@ -1,0 +1,35 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no root@88.222.213.235 "
+            export PATH=/root/.nvm/versions/node/v20.19.5/bin:\$PATH &&
+            cd ~/zhz/agora-token-server &&
+            git stash &&
+            git pull origin main &&
+            npm install &&
+            if tmux has-session -t agora-token-server 2>/dev/null; then
+              echo \"Already session running: agora-token-server. Killing it...\"
+              tmux kill-session -t agora-token-server
+            fi &&
+            echo \"Starting new session: agora-token-server\" &&
+            tmux new-session -d -s agora-token-server 'npm start' &&
+            echo \"Successfully started 'npm start' in tmux session agora-token-server\"
+          "
