@@ -1,6 +1,7 @@
 // Global state
 let adminPassword = '';
 let statsInterval = null;
+let mobileMenuOpen = false;
 
 // DOM Elements
 const loginScreen = document.getElementById('loginScreen');
@@ -9,6 +10,8 @@ const loginForm = document.getElementById('loginForm');
 const loginError = document.getElementById('loginError');
 const logoutBtn = document.getElementById('logoutBtn');
 const liveIndicator = document.getElementById('liveIndicator');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const dashboardNav = document.querySelector('.dashboard-nav');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,9 +25,17 @@ function setupEventListeners() {
     loginForm.addEventListener('submit', handleLogin);
     logoutBtn.addEventListener('click', handleLogout);
 
+    // Mobile Menu
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
+
     // Navigation
     document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => switchSection(item.dataset.section));
+        item.addEventListener('click', () => {
+            switchSection(item.dataset.section);
+            closeMobileMenu();
+        });
     });
 
     // Config
@@ -50,6 +61,34 @@ function flashIndicator() {
         setTimeout(() => liveIndicator.style.opacity = '1', 200);
     }
 }
+
+// Mobile Menu Functions
+function toggleMobileMenu() {
+    if (mobileMenuOpen) {
+        closeMobileMenu();
+    } else {
+        openMobileMenu();
+    }
+}
+
+function openMobileMenu() {
+    dashboardNav.classList.add('mobile-open');
+    mobileMenuBtn.classList.add('active');
+    mobileMenuOpen = true;
+}
+
+function closeMobileMenu() {
+    dashboardNav.classList.remove('mobile-open');
+    mobileMenuBtn.classList.remove('active');
+    mobileMenuOpen = false;
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (mobileMenuOpen && !e.target.closest('.dashboard-nav') && !e.target.closest('.mobile-menu-btn')) {
+        closeMobileMenu();
+    }
+});
 
 // Login Handler
 async function handleLogin(e) {
