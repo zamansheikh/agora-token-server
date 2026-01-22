@@ -11,13 +11,47 @@ const loginError = document.getElementById('loginError');
 const logoutBtn = document.getElementById('logoutBtn');
 const liveIndicator = document.getElementById('liveIndicator');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const sidebarDrawer = document.querySelector('.sidebar-drawer');
+const drawerOverlay = document.getElementById('drawerOverlay');
+const closeDrawerBtn = document.getElementById('closeDrawerBtn');
 const dashboardNav = document.querySelector('.dashboard-nav');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if previously logged in (optional - for this demo we'll require login every reload for security)
     setupEventListeners();
+    checkPersistence();
 });
+
+// Check for saved session
+function checkPersistence() {
+    const savedPassword = localStorage.getItem('agora_admin_password');
+    if (savedPassword) {
+        performSilentLogin(savedPassword);
+    }
+}
+
+async function performSilentLogin(password) {
+    try {
+        const response = await fetch('/api/admin/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            adminPassword = password;
+            showDashboard();
+            loadDashboardData();
+        } else {
+            // Saved password no longer valid
+            localStorage.removeItem('agora_admin_password');
+        }
+    } catch (error) {
+        console.error('Silent login failed:', error);
+    }
+}
 
 // Setup Event Listeners
 function setupEventListeners() {
@@ -25,9 +59,17 @@ function setupEventListeners() {
     loginForm.addEventListener('submit', handleLogin);
     logoutBtn.addEventListener('click', handleLogout);
 
-    // Mobile Menu
+    // Mobile Menu and Drawer
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (closeDrawerBtn) {
+        closeDrawerBtn.addEventListener('click', closeMobileMenu);
+    }
+
+    if (drawerOverlay) {
+        drawerOverlay.addEventListener('click', closeMobileMenu);
     }
 
     // Navigation
@@ -72,20 +114,34 @@ function toggleMobileMenu() {
 }
 
 function openMobileMenu() {
-    dashboardNav.classList.add('mobile-open');
-    mobileMenuBtn.classList.add('active');
+    if (sidebarDrawer) {
+        sidebarDrawer.classList.add('mobile-open');
+    }
+    if (drawerOverlay) {
+        drawerOverlay.classList.add('active');
+    }
+    if (mobileMenuBtn) {
+        mobileMenuBtn.classList.add('active');
+    }
     mobileMenuOpen = true;
 }
 
 function closeMobileMenu() {
-    dashboardNav.classList.remove('mobile-open');
-    mobileMenuBtn.classList.remove('active');
+    if (sidebarDrawer) {
+        sidebarDrawer.classList.remove('mobile-open');
+    }
+    if (drawerOverlay) {
+        drawerOverlay.classList.remove('active');
+    }
+    if (mobileMenuBtn) {
+        mobileMenuBtn.classList.remove('active');
+    }
     mobileMenuOpen = false;
 }
 
 // Close menu when clicking outside
 document.addEventListener('click', (e) => {
-    if (mobileMenuOpen && !e.target.closest('.dashboard-nav') && !e.target.closest('.mobile-menu-btn')) {
+    if (mobileMenuOpen && !e.target.closest('.sidebar-drawer') && !e.target.closest('.mobile-menu-btn')) {
         closeMobileMenu();
     }
 });
@@ -107,6 +163,7 @@ async function handleLogin(e) {
 
         if (data.success) {
             adminPassword = password;
+            localStorage.setItem('agora_admin_password', password);
             showDashboard();
             loadDashboardData();
         } else {
@@ -122,6 +179,7 @@ async function handleLogin(e) {
 // Logout Handler
 function handleLogout() {
     adminPassword = '';
+    localStorage.removeItem('agora_admin_password');
     clearInterval(statsInterval);
     loginScreen.style.display = 'flex';
     adminDashboard.style.display = 'none';
@@ -132,7 +190,7 @@ function handleLogout() {
 // Show Dashboard
 function showDashboard() {
     loginScreen.style.display = 'none';
-    adminDashboard.style.display = 'block'; // Grid layout handled by CSS if needed, but container is block
+    adminDashboard.style.display = 'grid'; // Maintain grid layout
 
     // Auto-refresh stats every 5 seconds for "Live" feel
     statsInterval = setInterval(loadStatistics, 5000);
@@ -283,6 +341,7 @@ async function handleConfigUpdate(e) {
 
             if (newPassword) {
                 adminPassword = newPassword;
+                localStorage.setItem('agora_admin_password', newPassword);
                 document.getElementById('newAdminPassword').value = '';
             }
             loadConfig();
