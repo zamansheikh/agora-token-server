@@ -76,20 +76,9 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Root endpoint
+// Root endpoint - serve admin panel
 app.get('/', (req, res) => {
-    res.json({
-        message: 'Agora Token Server is running!',
-        version: '2.0.0',
-        endpoints: {
-            health: '/api/health',
-            admin: '/admin.html',
-            rtcTokenPost: 'POST /api/token/rtc',
-            rtmTokenPost: 'POST /api/token/rtm',
-            rtcTokenGet: 'GET /api/token/rtc',
-            rtmTokenGet: 'GET /api/token/rtm',
-        },
-    });
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Error handling middleware
