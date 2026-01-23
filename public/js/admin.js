@@ -83,6 +83,8 @@ function setupEventListeners() {
     // Config
     document.getElementById('configForm').addEventListener('submit', handleConfigUpdate);
     document.getElementById('loadConfigBtn').addEventListener('click', loadConfig);
+    document.getElementById('copyAppIdBtn').addEventListener('click', () => copyToClipboard('agoraAppId'));
+    document.getElementById('copyAppCertBtn').addEventListener('click', () => copyToClipboard('agoraAppCertificate'));
 
     // Statistics
     document.getElementById('refreshStatsBtn').addEventListener('click', () => {
@@ -430,7 +432,40 @@ function showMessage(element, message, type) {
     }, 3000);
 }
 
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-    // Could add visual feedback here
+function copyToClipboard(elementIdOrText) {
+    let text;
+    if (typeof elementIdOrText === 'string' && document.getElementById(elementIdOrText)) {
+        // It's an element ID
+        const element = document.getElementById(elementIdOrText);
+        text = element.value || element.textContent;
+        
+        // Visual feedback for config copy buttons
+        if (elementIdOrText === 'agoraAppId' || elementIdOrText === 'agoraAppCertificate') {
+            const button = elementIdOrText === 'agoraAppId' ? document.getElementById('copyAppIdBtn') : document.getElementById('copyAppCertBtn');
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.innerHTML = originalIcon;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+    } else {
+        // It's direct text
+        text = elementIdOrText;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        // Additional feedback could be added here
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        // Fallback for older browsers
+        if (document.getElementById(elementIdOrText)) {
+            const element = document.getElementById(elementIdOrText);
+            element.select();
+            document.execCommand('copy');
+        }
+    });
 }
+

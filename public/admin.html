@@ -176,14 +176,24 @@
                                 <label for="agoraAppId">
                                     <i class="fas fa-id-card"></i> App ID
                                 </label>
-                                <input type="text" id="agoraAppId" placeholder="Enter Agora App ID" required>
+                                <div class="input-with-copy">
+                                    <input type="text" id="agoraAppId" placeholder="Enter Agora App ID" required>
+                                    <button type="button" id="copyAppIdBtn" class="btn-copy" title="Copy App ID">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="agoraAppCertificate">
                                     <i class="fas fa-key"></i> App Certificate
                                 </label>
-                                <input type="password" id="agoraAppCertificate" placeholder="Enter Agora App Certificate" required>
+                                <div class="input-with-copy">
+                                    <input type="text" id="agoraAppCertificate" placeholder="Enter Agora App Certificate" required>
+                                    <button type="button" id="copyAppCertBtn" class="btn-copy" title="Copy App Certificate">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <h3 style="margin: 2rem 0 1.5rem; color: var(--secondary-color);">Default Parameters</h3>
