@@ -285,7 +285,7 @@ h2 {
 /* Stats Cards */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 3rem;
 }
@@ -1042,6 +1042,33 @@ small {
     .copy-btn {
         padding: 0.6rem 0.7rem;
         font-size: 0.7rem;
+    }
+}
+
+/* Desktop - Stats horizontal layout for large screens */
+@media (min-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        flex-direction: row;
+        text-align: left;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+
+    .stat-info h3 {
+        font-size: 1.75rem;
     }
 }
 

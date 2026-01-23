@@ -33,7 +33,7 @@ router.get('/config', verifyAdmin, (req, res) => {
         const safeConfig = { ...config };
         delete safeConfig.adminPassword;
 
-        configManager.incrementStat('admin');
+        // Do NOT count config reads in statistics
 
         res.json({
             success: true,
@@ -65,7 +65,7 @@ router.post('/config', verifyAdmin, (req, res) => {
         const success = configManager.updateConfig(updates);
 
         if (success) {
-            configManager.incrementStat('admin');
+            // Do NOT count config updates in statistics
             
             res.json({
                 success: true,
@@ -98,7 +98,8 @@ router.get('/stats', verifyAdmin, (req, res) => {
     try {
         const stats = configManager.getStats();
         
-        configManager.incrementStat('admin');
+        // Do NOT count admin panel reload requests in statistics
+        // Only valid API requests (RTC/RTM tokens) should be counted
 
         res.json({
             success: true,

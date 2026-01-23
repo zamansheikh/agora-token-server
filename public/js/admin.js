@@ -411,7 +411,7 @@ async function runTokenTest(url, resultElementId) {
                     ${data.token.substring(0, 50)}...
                 </div>
             `;
-            loadStatistics(); // Refresh stats to show the new request
+            // Don't reload stats here - it was causing dummy admin requests to be tracked
         } else {
             resultDiv.innerHTML = `<span style="color:var(--danger-color)">Error: ${data.error || 'Unknown error'}</span>`;
         }
